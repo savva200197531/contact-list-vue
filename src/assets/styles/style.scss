@@ -4,6 +4,7 @@
 *, *:before, *:after {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body {
@@ -26,6 +27,7 @@ li, ul {
   border-radius: 4px;
   color: white;
   font-size: 16px;
+  padding: 0 8px;
 
   &:hover {
     opacity: 0.8;

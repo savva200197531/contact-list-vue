@@ -1,10 +1,21 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import router from '@/router/router';
 
 Vue.use(Vuex);
 
 const state = {
-  contacts: {}
+  contacts: {
+    234: {
+      name: 'Anton',
+      phone: '323232'
+    }
+  },
+  popup: {
+    show: false,
+    text: '',
+    id: ''
+  }
 };
 
 const mutations = {
@@ -15,16 +26,50 @@ const mutations = {
       phone: payload.phone
     });
   },
-  addField() {
-
-  }
+  removeContact(state, id) {
+    Vue.delete(state.contacts, id);
+  },
+  addField(state, payload) {
+    Object.assign(state.contacts[payload.id], payload.data);
+  },
+  removeField(state, payload) {
+    Vue.delete(state.contacts[payload.id], payload.key);
+  },
+  changePopupValues(state, payload) {
+    state.popup = payload;
+  },
 };
 
 const actions = {
   createContact({ commit }, payload) {
     commit('addContact', payload);
-    console.log(payload);
-  }
+  },
+  deleteContact({ commit }, id) {
+    commit('removeContact', id);
+  },
+  createField({ commit }, payload) {
+    commit('addField', payload);
+  },
+  deleteField({ commit }, payload) {
+    commit('removeField', payload);
+    if (!Object.keys(state.contacts[payload.id]).length) {
+      commit('removeContact', payload.id);
+      router.push('/');
+    }
+  },
+  showPopup({ commit }, payload) {
+    commit('changePopupValues', {
+      show: true,
+      ...payload
+    });
+  },
+  hidePopup({ commit }) {
+    commit('changePopupValues', {
+      show: false,
+      type: '',
+      data: {}
+    })
+  },
 };
 
 const getters = {

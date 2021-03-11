@@ -11,6 +11,7 @@
           class="contact"
           custom v-slot="{ navigate }">
         <div @click="navigate" role="link">
+          <div class="close" @click.prevent="deleteContact(contact.name, key)">x</div>
           <div v-for="(contactValue, contactKey) in contact" class="contact-info-row">
             <span class="contact-info-key">{{ contactKey }}</span>:
             <span class="contact-info-value">{{ contactValue }}</span>
@@ -18,7 +19,7 @@
         </div>
       </router-link>
       <form @submit.prevent="validateForm" v-if="showForm" class="contact-form contact">
-        <div class="contact-form-close" @click="closeForm">x</div>
+        <div class="close" @click="closeForm">x</div>
         <div class="contact-info-row" v-for="(fieldValue, fieldKey) in initialFields">
           <label :for="fieldKey" class="contact-info-key">{{ fieldKey }}:</label>
           <input v-model="initialFields[fieldKey]" :id="fieldKey" type="text" class="contact-info-value dark-input">
@@ -31,11 +32,13 @@
         </div>
       </form>
     </div>
+    <popup></popup>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex';
+import Popup from '@/components/Popup';
 
 export default {
   name: "contactsPage",
@@ -47,6 +50,9 @@ export default {
     },
     errors: []
   }),
+  components: {
+    Popup
+  },
   computed: {
     ...mapState('storage', [
       'contacts'
@@ -54,7 +60,8 @@ export default {
   },
   methods: {
     ...mapActions('storage', [
-      'createContact'
+      'createContact',
+      'showPopup'
     ]),
     closeForm() {
       this.showForm = false;
@@ -67,13 +74,22 @@ export default {
       const formKeys = Object.keys(this.initialFields);
       this.errors = [];
       formKeys.forEach(key => {
-        const field = this.initialFields[key];
-        if (!field.trim().length) this.errors.push(`Field ${key} is required!`);
+        if (!this.initialFields[key].trim().length) this.errors.push(`Field ${key} is required!`);
       });
       if (!this.errors.length) {
         this.createContact(this.initialFields);
         this.closeForm();
+        formKeys.forEach(key => this.initialFields[key] = '');
       }
+    },
+    deleteContact(name, key) {
+      this.showPopup({
+        type: 'contact',
+        data: {
+          id: key,
+          text: `Are you sure you want to delete the contact ${name}?`
+        }
+      });
     }
   }
 }
@@ -82,9 +98,13 @@ export default {
 <style lang="scss" scoped>
 @import "../assets/styles/variables";
 
+.contacts-page {
+  padding: 0 10px;
+}
+
 .add-contact-btn-wrapper {
   margin-top: 10px;
-  max-width: 300px;
+  width: 300px;
   //margin-left: auto;
 }
 
@@ -99,15 +119,15 @@ export default {
   border: 1px solid white;
   border-radius: 4px;
   padding: 10px;
-  cursor: pointer;
   background: $dark-color;
   color: white;
+  position: relative;
 }
 
 .contact-info-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  //justify-content: center;
 }
 
 .contact-info-key {
@@ -126,25 +146,16 @@ export default {
 }
 
 .contact-form {
-  position: relative;
   cursor: auto;
 }
 
-.contact-form-close {
+.close {
   position: absolute;
   top: -3px;
   right: 0;
-  cursor: pointer;
-  padding: 5px;
 }
 
 .create-contact-btn-wrapper {
   margin-top: 8px;
-}
-
-.contact-form-errors {
-  color: $danger-color;
-  text-align: center;
-  margin-top: 5px;
 }
 </style>

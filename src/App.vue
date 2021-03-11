@@ -10,4 +10,17 @@ export default {
 }
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+@import "./assets/styles/variables";
+
+.contact-form-errors {
+  color: $danger-color;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.close {
+  cursor: pointer;
+  padding: 5px;
+}
+</style>
