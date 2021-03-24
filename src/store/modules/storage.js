@@ -6,16 +6,18 @@ Vue.use(Vuex);
 
 const state = {
   contacts: {
-    234: {
-      name: 'Anton',
-      phone: '323232'
+    1: {
+      name: '123',
+      phone: '321'
     }
   },
   popup: {
     show: false,
     text: '',
-    id: ''
-  }
+    id: '',
+    clearForm: false
+  },
+  history: []
 };
 
 const mutations = {
@@ -35,9 +37,10 @@ const mutations = {
   removeField(state, payload) {
     Vue.delete(state.contacts[payload.id], payload.key);
   },
+
   changePopupValues(state, payload) {
     state.popup = payload;
-  },
+  }
 };
 
 const actions = {

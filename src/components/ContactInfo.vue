@@ -2,7 +2,7 @@
   <div class="contact-info">
     <router-link class="go-back" to="/"><- Go back</router-link>
     <div class="contact-card" v-if="Object.keys(currentContact).length">
-      <span class="rollback">Rollback</span>
+      <!--      <span class="rollback">Rollback</span>-->
       <div class="contact-info-row" v-for="(contactValue, contactKey) in currentContact">
         <div class="contact-info-row-left">
           <span class="contact-info-key">{{ contactKey }}</span>
@@ -16,7 +16,7 @@
       </div>
       <form v-if="showForm" class="contact-info-row contact-info-form">
         <div class="contact-info-inputs">
-          <input :readonly="block" v-model="newValues.key" placeholder="key" id="key" type="text" class="dark-input"> :
+          <input :readonly="redact" v-model="newValues.key" placeholder="key" id="key" type="text" class="dark-input"> :
           <input v-model="newValues.value" placeholder="value" id="value" type="text" class="dark-input">
         </div>
         <div class="contact-form-errors" v-for="error in errors">
@@ -24,11 +24,11 @@
         </div>
         <div class="contact-info-buttons">
           <button class="contact-info-btn dark-btn" type="submit" @click.prevent="validateFields">Save</button>
-          <button type="button" class="contact-info-btn dark-btn" @click="closeForm">Remove</button>
+          <button type="button" class="contact-info-btn dark-btn" @click="closeForm">Cancel</button>
         </div>
       </form>
       <div class="add-field">
-        <button :disabled="block" class="add-field-btn dark-btn" @click="openForm">Add field</button>
+        <button :disabled="redact" class="add-field-btn dark-btn" @click="openForm">Add field</button>
       </div>
     </div>
     <popup></popup>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import Popup from '@/components/Popup';
 
 export default {
@@ -45,12 +45,13 @@ export default {
     currentContact: {},
     showForm: false,
     newValues: {
-      key: '2',
-      value: '1'
+      key: '',
+      value: ''
     },
     errors: [],
     currentContactId: '',
-    block: false
+    redact: false,
+    history: []
   }),
   components: {
     Popup
@@ -58,21 +59,33 @@ export default {
   computed: {
     ...mapGetters('storage', [
       'getCurrentContact'
+    ]),
+    ...mapState('storage', [
+      'popup'
     ])
   },
   methods: {
     ...mapActions('storage', [
       'createField',
-        'showPopup'
+      'showPopup'
     ]),
-    closeForm() {
+    resetForm() {
       this.showForm = false;
+      this.redact = false;
       this.errors = [];
-      this.newValues = {
-        key: '',
-        value: ''
-      };
-      this.block = false;
+      Object.keys(this.newValues).forEach(key => this.newValues[key] = '');
+    },
+    closeForm() {
+      // if (this.redact) {
+      //   this.showPopup({
+      //     type: 'redact',
+      //     data: {
+      //       text: `Are you sure you want to undo your changes?`
+      //     }
+      //   });
+      // } else {
+      // }
+      this.resetForm();
     },
     openForm() {
       this.showForm = true;
@@ -88,8 +101,8 @@ export default {
           id: this.currentContactId,
           data: { [this.newValues.key]: this.newValues.value }
         });
+        this.resetForm();
         this.closeForm();
-        formKeys.forEach(key => this.newValues[key] = '');
       }
     },
     deleteField(key) {
@@ -108,12 +121,12 @@ export default {
         key,
         value
       };
-      this.block = true;
+      this.redact = true;
     }
   },
   mounted() {
-    this.currentContact = this.getCurrentContact(window.location.href.split('contact')[1]);
     this.currentContactId = window.location.href.split('contact')[1];
+    this.currentContact = this.getCurrentContact(this.currentContactId);
   }
 }
 </script>
@@ -149,15 +162,7 @@ export default {
   font-size: 18px;
 }
 
-.contact-info-form {
-  //justify-content: space-between;
-  //max-width: 400px;
-  //width: 100%;
-  //width: 40%;
-}
-
 .contact-info-inputs {
-  //width: 50%;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -168,16 +173,9 @@ export default {
     height: 40px;
     font-weight: 500;
     font-size: 16px;
-    //margin-left: 8px;
     width: 49%;
   }
 }
-
-//.contact-info-input {
-//  display: flex;
-//  justify-content: space-between;
-//  align-items: center;
-//}
 
 .contact-info-row-right {
   display: flex;
@@ -190,10 +188,6 @@ export default {
   width: 100%;
   margin-top: 5px;
   justify-content: space-between;
-
-  button {
-    //width: %;
-  }
 }
 
 .contact-info-row {
@@ -201,7 +195,6 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
-  //min-height: 40px;
   font-size: 18px;
   border-bottom: 1px solid white;
   padding: 8px 0;
@@ -213,10 +206,6 @@ export default {
 
 .contact-info-value {
   margin-left: 8px;
-}
-
-.contact-info-btn {
-  //margin-left: 5px;
 }
 
 .add-field-form-close {

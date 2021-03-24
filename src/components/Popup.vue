@@ -2,7 +2,7 @@
   <div class="popup" v-if="popup.show">
     <h1 class="popup-title">{{ popup.data.text }}</h1>
     <div class="popup-buttons">
-      <button class="dark-btn" @click="closePopupDelete">Yes</button>
+      <button class="dark-btn" @click="submitPopup">Yes</button>
       <button class="dark-btn" @click="closePopup()">No</button>
     </div>
   </div>
@@ -27,7 +27,7 @@ export default {
     closePopup() {
       this.hidePopup();
     },
-    closePopupDelete() {
+    submitPopup() {
       switch (this.popup.type) {
         case 'contact':
           this.deleteContact(this.popup.data.id);

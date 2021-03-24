@@ -45,8 +45,8 @@ export default {
   data: () => ({
     showForm: false,
     initialFields: {
-      name: '1',
-      phone: '2'
+      name: '',
+      phone: ''
     },
     errors: []
   }),
@@ -66,20 +66,19 @@ export default {
     closeForm() {
       this.showForm = false;
       this.errors = [];
+      Object.keys(this.initialFields).forEach(key => this.initialFields[key] = '');
     },
     openForm() {
       this.showForm = true;
     },
     validateForm() {
-      const formKeys = Object.keys(this.initialFields);
       this.errors = [];
-      formKeys.forEach(key => {
+      Object.keys(this.initialFields).forEach(key => {
         if (!this.initialFields[key].trim().length) this.errors.push(`Field ${key} is required!`);
       });
       if (!this.errors.length) {
         this.createContact(this.initialFields);
         this.closeForm();
-        formKeys.forEach(key => this.initialFields[key] = '');
       }
     },
     deleteContact(name, key) {
@@ -105,7 +104,6 @@ export default {
 .add-contact-btn-wrapper {
   margin-top: 10px;
   width: 300px;
-  //margin-left: auto;
 }
 
 .contacts {
@@ -122,12 +120,12 @@ export default {
   background: $dark-color;
   color: white;
   position: relative;
+  box-shadow: $light-shadow;
 }
 
 .contact-info-row {
   display: flex;
   align-items: center;
-  //justify-content: center;
 }
 
 .contact-info-key {
